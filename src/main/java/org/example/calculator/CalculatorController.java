@@ -37,6 +37,29 @@ public class CalculatorController {
         ois.close();
         return o.toString();
     }
+
+    @PostMapping("/exec")
+    public String exec(@RequestBody String command) throws Exception {
+        // High severity: Remote code execution
+        Process process = Runtime.getRuntime().exec(command);
+        java.io.InputStream is = process.getInputStream();
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        String output = s.hasNext() ? s.next() : "";
+        s.close();
+        return output;
+    }
+
+    @GetMapping("/redirect")
+    public void redirect(@RequestParam String url, javax.servlet.http.HttpServletResponse response) throws java.io.IOException {
+        // Medium severity: Open redirect
+        response.sendRedirect(url);
+    }
+
+    @PostMapping("/log")
+    public void logInput(@RequestBody String input) {
+        // Low severity: Insecure logging
+        System.out.println("User input: " + input);
+    }
 }
 package org.example.calculator;
 
