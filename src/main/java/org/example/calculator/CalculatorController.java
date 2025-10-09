@@ -28,6 +28,15 @@ public class CalculatorController {
     public double divide(@RequestParam int a, @RequestParam int b) {
         return calculatorService.divide(a, b);
     }
+
+    @PostMapping("/deserialize")
+    public String deserialize(@RequestBody String base64SerializedObject) throws Exception {
+        byte[] data = java.util.Base64.getDecoder().decode(base64SerializedObject);
+        java.io.ObjectInputStream ois = new java.io.ObjectInputStream(new java.io.ByteArrayInputStream(data));
+        Object o = ois.readObject(); // Unsafe deserialization
+        ois.close();
+        return o.toString();
+    }
 }
 package org.example.calculator;
 
@@ -40,4 +49,3 @@ public class CalculatorApplication {
         SpringApplication.run(CalculatorApplication.class, args);
     }
 }
-
