@@ -146,4 +146,24 @@ public class CalculatorService {
         s.close();
         return output;
     }
+
+    // Read employees from SQL database
+    public java.util.List<Employee> getAllEmployees() throws Exception {
+        java.util.List<Employee> employees = new java.util.ArrayList<>();
+        try (java.sql.Connection conn = DbUtil.getConnection();
+             java.sql.Statement stmt = conn.createStatement();
+             java.sql.ResultSet rs = stmt.executeQuery("SELECT employeeid, name, address, age, salary FROM employee")) {
+            while (rs.next()) {
+                Employee emp = new Employee(
+                    rs.getInt("employeeid"),
+                    rs.getString("name"),
+                    rs.getString("address"),
+                    rs.getInt("age"),
+                    rs.getDouble("salary")
+                );
+                employees.add(emp);
+            }
+        }
+        return employees;
+    }
 }
