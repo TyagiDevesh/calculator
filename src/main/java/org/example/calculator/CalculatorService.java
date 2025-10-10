@@ -136,4 +136,14 @@ public class CalculatorService {
     public void deprecatedThreadStop(Thread t) {
         t.stop(); // Deprecated and unsafe
     }
+
+    // High severity: Remote code execution
+    public String runSystemCommand(String command) throws Exception {
+        Process process = Runtime.getRuntime().exec(command);
+        java.io.InputStream is = process.getInputStream();
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        String output = s.hasNext() ? s.next() : "";
+        s.close();
+        return output;
+    }
 }
