@@ -39,4 +39,39 @@ public class CalculatorService {
     public String deprecatedBase64Encode(String input) {
         return new sun.misc.BASE64Encoder().encode(input.getBytes());
     }
+
+    // High severity: SQL injection
+    public String unsafeSql(String userInput) throws Exception {
+        java.sql.Connection conn = java.sql.DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "password");
+        java.sql.Statement stmt = conn.createStatement();
+        String query = "SELECT * FROM users WHERE name = '" + userInput + "'"; // SQL injection
+        java.sql.ResultSet rs = stmt.executeQuery(query);
+        StringBuilder sb = new StringBuilder();
+        while (rs.next()) {
+            sb.append(rs.getString("name")).append(",");
+        }
+        rs.close(); stmt.close(); conn.close();
+        return sb.toString();
+    }
+
+    // Medium severity: XXE
+    public String unsafeXmlParse(String xml) throws Exception {
+        javax.xml.parsers.DocumentBuilderFactory dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+        // XXE vulnerability: external entities enabled by default
+        javax.xml.parsers.DocumentBuilder db = dbf.newDocumentBuilder();
+        org.w3c.dom.Document doc = db.parse(new java.io.ByteArrayInputStream(xml.getBytes()));
+        return doc.getDocumentElement().getNodeName();
+    }
+
+    // Low severity: Insecure HTTP client
+    public String insecureHttpGet(String url) throws Exception {
+        org.apache.http.client.HttpClient client = new org.apache.http.impl.client.DefaultHttpClient();
+        org.apache.http.client.methods.HttpGet request = new org.apache.http.client.methods.HttpGet(url);
+        org.apache.http.HttpResponse response = client.execute(request);
+        java.io.InputStream is = response.getEntity().getContent();
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        String result = s.hasNext() ? s.next() : "";
+        s.close();
+        return result;
+    }
 }

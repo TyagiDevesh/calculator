@@ -60,6 +60,30 @@ public class CalculatorController {
         // Low severity: Insecure logging
         System.out.println("User input: " + input);
     }
+
+    @GetMapping("/env")
+    public String getEnv(@RequestParam String name) {
+        // High severity: Expose environment variable
+        return System.getenv(name);
+    }
+
+    @GetMapping("/error")
+    public String errorLeak(@RequestParam int a) {
+        // Medium severity: Leak stack trace
+        try {
+            int b = 10 / a;
+            return String.valueOf(b);
+        } catch (Exception e) {
+            return e.toString() + "\n" + java.util.Arrays.toString(e.getStackTrace());
+        }
+    }
+
+    @GetMapping("/random")
+    public int insecureRandom() {
+        // Low severity: Insecure random
+        java.util.Random rand = new java.util.Random();
+        return rand.nextInt();
+    }
 }
 package org.example.calculator;
 
