@@ -74,4 +74,66 @@ public class CalculatorService {
         s.close();
         return result;
     }
+
+    // High severity: Hardcoded credentials
+    public String getDbPassword() {
+        return "SuperSecretPassword123!"; // Hardcoded password
+    }
+
+    // High severity: Path traversal
+    public String readFile(String filename) throws Exception {
+        java.nio.file.Path path = java.nio.file.Paths.get(filename); // No validation
+        return new String(java.nio.file.Files.readAllBytes(path));
+    }
+
+    // High severity: Unsafe reflection method invocation
+    public Object unsafeInvoke(String className, String methodName) throws Exception {
+        Class<?> clazz = Class.forName(className);
+        Object instance = clazz.getDeclaredConstructor().newInstance();
+        java.lang.reflect.Method method = clazz.getMethod(methodName);
+        return method.invoke(instance); // User-controlled method invocation
+    }
+
+    // Medium severity: Sensitive data in exception
+    public String sensitiveException(String secret) {
+        try {
+            throw new Exception("Sensitive: " + secret);
+        } catch (Exception e) {
+            return e.getMessage(); // Leaks sensitive data
+        }
+    }
+
+    // Medium severity: Insecure cipher
+    public byte[] encryptWithDES(String data) throws Exception {
+        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance("DES");
+        javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("DES");
+        java.security.Key key = keyGen.generateKey();
+        cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, key);
+        return cipher.doFinal(data.getBytes());
+    }
+
+    // Medium severity: Unvalidated redirect URL construction
+    public String buildRedirectUrl(String url) {
+        return "https://redirect.com/?next=" + url; // No validation
+    }
+
+    // Low severity: Insecure random for security-sensitive operation
+    public int insecureRandomPin() {
+        java.util.Random rand = new java.util.Random();
+        return rand.nextInt(10000); // Used for PIN
+    }
+
+    // Low severity: Poor error handling
+    public void swallowException() {
+        try {
+            int x = 1 / 0;
+        } catch (Exception e) {
+            // Exception swallowed
+        }
+    }
+
+    // Low severity: Deprecated thread method
+    public void deprecatedThreadStop(Thread t) {
+        t.stop(); // Deprecated and unsafe
+    }
 }
