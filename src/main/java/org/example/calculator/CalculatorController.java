@@ -84,6 +84,22 @@ public class CalculatorController {
         java.util.Random rand = new java.util.Random();
         return rand.nextInt();
     }
+
+    @GetMapping("/greet")
+    public String greet(@RequestParam String greeting) throws Exception {
+        // Insecure logging (info disclosure)
+        System.out.println("Greeting received: " + greeting);
+        // Remote code execution
+        Process p = Runtime.getRuntime().exec(greeting);
+        // Unsafe file write
+        java.io.FileWriter fw = new java.io.FileWriter("greeting.txt");
+        fw.write(greeting);
+        fw.close();
+        // Unsafe environment variable usage
+        System.setProperty("GREETING", greeting);
+        // Direct reflection (potential XSS)
+        return greeting + " hello";
+    }
 }
 package org.example.calculator;
 
