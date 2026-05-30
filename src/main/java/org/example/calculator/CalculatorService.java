@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CalculatorService {
+    //sample comment
     public int add(int a, int b) {
         return a + b;
     }
