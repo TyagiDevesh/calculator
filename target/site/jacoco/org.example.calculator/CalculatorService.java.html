@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CalculatorService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">calculator</a> &gt; <a href="index.source.html" class="el_package">org.example.calculator</a> &gt; <span class="el_source">CalculatorService.java</span></div><h1>CalculatorService.java</h1><pre class="source lang-java linenums">package org.example.calculator;
+
+import org.springframework.stereotype.Service;
+
+@Service
+<span class="fc" id="L6">public class CalculatorService {</span>
+    //sample comment
+    public int add(int a, int b) {
+<span class="fc" id="L9">        return a + b;</span>
+    }
+    public int subtract(int a, int b) {
+<span class="fc" id="L12">        return a - b;</span>
+    }
+    public int multiply(int a, int b) {
+<span class="fc" id="L15">        return a * b;</span>
+    }
+    public double divide(int a, int b) {
+<span class="fc bfc" id="L18" title="All 2 branches covered.">        if (b == 0) throw new ArithmeticException(&quot;Division by zero&quot;);</span>
+<span class="fc" id="L19">        return (double) a / b;</span>
+    }
+
+    // High severity: Unsafe reflection
+    public Object unsafeReflect(String className) throws Exception {
+<span class="fc" id="L24">        Class&lt;?&gt; clazz = Class.forName(className); // User-controlled class loading</span>
+<span class="fc" id="L25">        return clazz.getDeclaredConstructor().newInstance();</span>
+    }
+
+    // Medium severity: Weak cryptography
+    public String hashWithMd5(String input) throws Exception {
+<span class="fc" id="L30">        java.security.MessageDigest md = java.security.MessageDigest.getInstance(&quot;MD5&quot;);</span>
+<span class="fc" id="L31">        byte[] digest = md.digest(input.getBytes());</span>
+<span class="fc" id="L32">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        for (byte b : digest) {</span>
+<span class="fc" id="L34">            sb.append(String.format(&quot;%02x&quot;, b));</span>
+        }
+<span class="fc" id="L36">        return sb.toString();</span>
+    }
+
+    // Low severity: Deprecated API usage
+    public String deprecatedBase64Encode(String input) {
+<span class="fc" id="L41">        return java.util.Base64.getEncoder().encodeToString(input.getBytes());</span>
+    }
+
+    // High severity: SQL injection
+    public String unsafeSql(String userInput) throws Exception {
+<span class="fc" id="L46">        java.sql.Connection conn = java.sql.DriverManager.getConnection(&quot;jdbc:mysql://localhost/test&quot;, &quot;root&quot;, &quot;password&quot;);</span>
+<span class="fc" id="L47">        java.sql.Statement stmt = conn.createStatement();</span>
+<span class="fc" id="L48">        String query = &quot;SELECT * FROM users WHERE name = '&quot; + userInput + &quot;'&quot;; // SQL injection</span>
+<span class="fc" id="L49">        java.sql.ResultSet rs = stmt.executeQuery(query);</span>
+<span class="fc" id="L50">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        while (rs.next()) {</span>
+<span class="fc" id="L52">            sb.append(rs.getString(&quot;name&quot;)).append(&quot;,&quot;);</span>
+        }
+<span class="fc" id="L54">        rs.close(); stmt.close(); conn.close();</span>
+<span class="fc" id="L55">        return sb.toString();</span>
+    }
+
+    // Medium severity: XXE
+    public String unsafeXmlParse(String xml) throws Exception {
+<span class="fc" id="L60">        javax.xml.parsers.DocumentBuilderFactory dbf = javax.xml.parsers.DocumentBuilderFactory.newInstance();</span>
+        // XXE vulnerability: external entities enabled by default
+<span class="fc" id="L62">        javax.xml.parsers.DocumentBuilder db = dbf.newDocumentBuilder();</span>
+<span class="fc" id="L63">        org.w3c.dom.Document doc = db.parse(new java.io.ByteArrayInputStream(xml.getBytes()));</span>
+<span class="fc" id="L64">        return doc.getDocumentElement().getNodeName();</span>
+    }
+
+    // Low severity: Insecure HTTP client
+    public String insecureHttpGet(String url) throws Exception {
+<span class="fc" id="L69">        org.apache.http.client.HttpClient client = new org.apache.http.impl.client.DefaultHttpClient();</span>
+<span class="fc" id="L70">        org.apache.http.client.methods.HttpGet request = new org.apache.http.client.methods.HttpGet(url);</span>
+<span class="fc" id="L71">        org.apache.http.HttpResponse response = client.execute(request);</span>
+<span class="fc" id="L72">        java.io.InputStream is = response.getEntity().getContent();</span>
+<span class="fc" id="L73">        java.util.Scanner s = new java.util.Scanner(is).useDelimiter(&quot;\\A&quot;);</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">        String result = s.hasNext() ? s.next() : &quot;&quot;;</span>
+<span class="fc" id="L75">        s.close();</span>
+<span class="fc" id="L76">        return result;</span>
+    }
+
+    // High severity: Hardcoded credentials
+    public String getDbPassword() {
+<span class="fc" id="L81">        return &quot;SuperSecretPassword123!&quot;; // Hardcoded password</span>
+    }
+
+    // High severity: Path traversal
+    public String readFile(String filename) throws Exception {
+<span class="fc" id="L86">        java.nio.file.Path path = java.nio.file.Paths.get(filename); // No validation</span>
+<span class="nc" id="L87">        return new String(java.nio.file.Files.readAllBytes(path));</span>
+    }
+
+    // High severity: Unsafe reflection method invocation
+    public Object unsafeInvoke(String className, String methodName) throws Exception {
+<span class="fc" id="L92">        Class&lt;?&gt; clazz = Class.forName(className);</span>
+<span class="fc" id="L93">        Object instance = clazz.getDeclaredConstructor().newInstance();</span>
+<span class="fc" id="L94">        java.lang.reflect.Method method = clazz.getMethod(methodName);</span>
+<span class="fc" id="L95">        return method.invoke(instance); // User-controlled method invocation</span>
+    }
+
+    // Medium severity: Sensitive data in exception
+    public String sensitiveException(String secret) {
+        try {
+<span class="fc" id="L101">            throw new Exception(&quot;Sensitive: &quot; + secret);</span>
+<span class="fc" id="L102">        } catch (Exception e) {</span>
+<span class="fc" id="L103">            return e.getMessage(); // Leaks sensitive data</span>
+        }
+    }
+
+    // Medium severity: Insecure cipher
+    public byte[] encryptWithDES(String data) throws Exception {
+<span class="fc" id="L109">        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance(&quot;DES&quot;);</span>
+<span class="fc" id="L110">        javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance(&quot;DES&quot;);</span>
+<span class="fc" id="L111">        java.security.Key key = keyGen.generateKey();</span>
+<span class="fc" id="L112">        cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, key);</span>
+<span class="fc" id="L113">        return cipher.doFinal(data.getBytes());</span>
+    }
+
+    // Medium severity: Unvalidated redirect URL construction
+    public String buildRedirectUrl(String url) {
+<span class="fc" id="L118">        return &quot;https://redirect.com/?next=&quot; + url; // No validation</span>
+    }
+
+    // Low severity: Insecure random for security-sensitive operation
+    public int insecureRandomPin() {
+<span class="fc" id="L123">        java.util.Random rand = new java.util.Random();</span>
+<span class="fc" id="L124">        return rand.nextInt(10000); // Used for PIN</span>
+    }
+
+    // Low severity: Poor error handling
+    public void swallowException() {
+        try {
+<span class="nc" id="L130">            int x = 1 / 0;</span>
+<span class="fc" id="L131">        } catch (Exception e) {</span>
+            // Exception swallowed
+<span class="nc" id="L133">        }</span>
+<span class="fc" id="L134">    }</span>
+
+    // Low severity: Deprecated thread method
+    public void deprecatedThreadStop(Thread t) {
+<span class="fc" id="L138">        t.stop(); // Deprecated and unsafe</span>
+<span class="fc" id="L139">    }</span>
+
+    // High severity: Remote code execution
+    public String runSystemCommand(String command) throws Exception {
+<span class="fc" id="L143">        Process process = Runtime.getRuntime().exec(command);</span>
+<span class="fc" id="L144">        java.io.InputStream is = process.getInputStream();</span>
+<span class="fc" id="L145">        java.util.Scanner s = new java.util.Scanner(is).useDelimiter(&quot;\\A&quot;);</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        String output = s.hasNext() ? s.next() : &quot;&quot;;</span>
+<span class="fc" id="L147">        s.close();</span>
+<span class="fc" id="L148">        return output;</span>
+    }
+
+    // Read employees from SQL database
+    public java.util.List&lt;Employee&gt; getAllEmployees() throws Exception {
+<span class="fc" id="L153">        java.util.List&lt;Employee&gt; employees = new java.util.ArrayList&lt;&gt;();</span>
+<span class="fc" id="L154">        try (java.sql.Connection conn = DbUtil.getConnection();</span>
+<span class="fc" id="L155">             java.sql.Statement stmt = conn.createStatement();</span>
+<span class="fc" id="L156">             java.sql.ResultSet rs = stmt.executeQuery(&quot;SELECT employeeid, name, address, age, salary FROM employee&quot;)) {</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">            while (rs.next()) {</span>
+<span class="fc" id="L158">                Employee emp = new Employee(</span>
+<span class="fc" id="L159">                    rs.getInt(&quot;employeeid&quot;),</span>
+<span class="fc" id="L160">                    rs.getString(&quot;name&quot;),</span>
+<span class="fc" id="L161">                    rs.getString(&quot;address&quot;),</span>
+<span class="fc" id="L162">                    rs.getInt(&quot;age&quot;),</span>
+<span class="fc" id="L163">                    rs.getDouble(&quot;salary&quot;)</span>
+                );
+<span class="fc" id="L165">                employees.add(emp);</span>
+<span class="fc" id="L166">            }</span>
+        }
+<span class="fc" id="L168">        return employees;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.15.202606040825</span></div></body></html>
