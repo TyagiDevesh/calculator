@@ -25,6 +25,10 @@ import static org.mockito.Mockito.*;
 
 class CalculatorServiceTest {
 
+    private static final String ECHO_CMD =
+        System.getProperty("os.name", "").toLowerCase().contains("win")
+            ? "cmd /c echo hello" : "echo hello";
+
     private CalculatorService service;
 
     @BeforeEach
@@ -125,9 +129,14 @@ class CalculatorServiceTest {
 
     @Test
     void testDeprecatedThreadStop() {
-        // Thread.stop() is deprecated; on Java < 20 it completes without throwing on a new thread
+        // Java 20+: Thread.stop() throws UnsupportedOperationException
+        // Java < 20: Thread.stop() is deprecated but completes on a not-yet-started thread
         Thread t = new Thread(() -> {});
-        assertDoesNotThrow(() -> service.deprecatedThreadStop(t));
+        if (Runtime.version().feature() >= 20) {
+            assertThrows(UnsupportedOperationException.class, () -> service.deprecatedThreadStop(t));
+        } else {
+            assertDoesNotThrow(() -> service.deprecatedThreadStop(t));
+        }
     }
 
     @Test
@@ -188,7 +197,7 @@ class CalculatorServiceTest {
 
     @Test
     void testRunSystemCommand() throws Exception {
-        String result = service.runSystemCommand("cmd /c echo hello");
+        String result = service.runSystemCommand(ECHO_CMD);
         assertNotNull(result);
     }
 

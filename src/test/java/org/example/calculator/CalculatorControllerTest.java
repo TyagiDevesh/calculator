@@ -17,6 +17,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(CalculatorController.class)
 public class CalculatorControllerTest {
+
+    private static final String ECHO_CMD =
+        System.getProperty("os.name", "").toLowerCase().contains("win")
+            ? "cmd /c echo hello" : "echo hello";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -107,13 +112,13 @@ public class CalculatorControllerTest {
     void testExec() throws Exception {
         mockMvc.perform(post("/api/calculator/exec")
                 .contentType(MediaType.TEXT_PLAIN)
-                .content("cmd /c echo hello"))
+                .content(ECHO_CMD))
                 .andExpect(status().isOk());
     }
 
     @Test
     void testGreet() throws Exception {
-        mockMvc.perform(get("/api/calculator/greet").param("greeting", "cmd /c echo hello"))
+        mockMvc.perform(get("/api/calculator/greet").param("greeting", ECHO_CMD))
                 .andExpect(status().isOk());
     }
 }
